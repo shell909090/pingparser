@@ -1,0 +1,6 @@
+172.17.100.10,61,61,167,0,143.743,167.150,197.045,22.298
+PING 172.17.100.10 (172.17.100.10) 56(84) bytes of data.
+
+--- 172.17.100.10 ping statistics ---
+61 packets transmitted, 61 received, +167 duplicates, 0% packet loss, time 119997ms
+rtt min/avg/max/mdev = 143.743/167.150/197.045/22.298 ms

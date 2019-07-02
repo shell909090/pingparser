@@ -27,7 +27,9 @@ host_matcher = re.compile(r'PING ([a-zA-Z0-9.\-]+) *\(')
 
 # This one works on OS X output which includes the percentage in 0.0% format
 # https://regex101.com/r/nmjQzI/2
-rslt_matcher = re.compile(r'(\d+) packets transmitted, (\d+) (?:packets )?received, (\d+\.?\d*)% packet loss')
+rslt_matcher = re.compile(r'(\d+) packets transmitted, (\d+) (?:packets )?received')
+dups_matcher = re.compile(r'\+(\d+) duplicates')
+loss_matcher = re.compile(r'(\d+\.?\d*)% packet loss')
 
 # Pull out round-trip min/avg/max/stddev = 49.042/49.042/49.042/0.000 ms
 minmax_matcher = re.compile(r'(\d+.\d+)/(\d+.\d+)/(\d+.\d+)/(\d+.\d+)')
@@ -36,6 +38,7 @@ minmax_matcher = re.compile(r'(\d+.\d+)/(\d+.\d+)/(\d+.\d+)/(\d+.\d+)')
 format_replacements = [('%h', 'host'),
                        ('%s', 'sent'),
                        ('%r', 'received'),
+                       ('%d', 'duplicates'),
                        ('%p', 'packet_loss'),
                        ('%m', 'minping'),
                        ('%a', 'avgping'),
@@ -46,12 +49,14 @@ format_replacements = [('%h', 'host'),
 default_format = ','.join([fmt for fmt, field in format_replacements])
 
 
-def _get_match_groups(ping_output, regex):
+def _get_match_groups(ping_output, regex, default=None):
     """
     Get groups by matching regex in output from ping command.
     """
     match = regex.search(ping_output)
     if not match:
+        if default is not None:
+            return default
         raise Exception('Invalid PING output:\n' + ping_output)
     return match.groups()
 
@@ -74,7 +79,9 @@ def parse(ping_output):
                     in milliseconds
     """
     host = _get_match_groups(ping_output, host_matcher)[0]
-    sent, received, packet_loss = _get_match_groups(ping_output, rslt_matcher)
+    sent, received = _get_match_groups(ping_output, rslt_matcher)
+    duplicates, = _get_match_groups(ping_output, dups_matcher, default=('0',))
+    packet_loss, = _get_match_groups(ping_output, loss_matcher)
 
     try:
         minping, avgping, maxping, jitter = _get_match_groups(ping_output,
@@ -85,6 +92,7 @@ def parse(ping_output):
     return {'host'        : host,
             'sent'        : sent,
             'received'    : received,
+            'duplicates'  : duplicates,
             'packet_loss' : packet_loss,
             'minping'     : minping,
             'avgping'     : avgping,
@@ -129,6 +137,7 @@ def main(argv=sys.argv):
             \t%h    host name or IP address
             \t%s    packets sent
             \t%r    packets received
+            \t%d    duplicates
             \t%p    packet_loss
             \t%m    minimum ping in milliseconds
             \t%a    average ping in milliseconds

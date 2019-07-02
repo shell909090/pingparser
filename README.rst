@@ -30,7 +30,7 @@ a dictionary containing the parsed fields::
   ... 2 packets transmitted, 2 received, 0% packet loss, time 5072ms
   ... rtt min/avg/max/mdev = 13.946/17.682/21.418/3.736 ms''')
   >>> OrderedDict(sorted(results.items()))
-  OrderedDict([('avgping', '17.682'), ('host', 'www.l.google.com'), ('jitter', '3.736'), ('maxping', '21.418'), ('minping', '13.946'), ('packet_loss', '0'), ('received', '2'), ('sent', '2')])
+  OrderedDict([('avgping', '17.682'), ('duplicates', '0'), ('host', 'www.l.google.com'), ('jitter', '3.736'), ('maxping', '21.418'), ('minping', '13.946'), ('packet_loss', '0'), ('received', '2'), ('sent', '2')])
 
 
 Installing
